@@ -9,14 +9,19 @@ public class SliderHandler : MonoBehaviour
     [SerializeField]
     TMPro.TextMeshProUGUI valueReadout;
     Slider _slider;
+
     void Start()
     {
         _slider = GetComponent<Slider>();
-        _slider.onValueChanged.AddListener((f) => 
+        _slider.onValueChanged.AddListener((f) =>
         {
             int value = Mathf.RoundToInt(f);
-            valueReadout.SetText(value.ToString());
-            spinner.Segments = value;
+            valueReadout.text = value.ToString();
         });
+    }
+
+    public void SetSpinStrength(float value)
+    {
+        spinner.Spin(value);
     }
 }

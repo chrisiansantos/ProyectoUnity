@@ -8,7 +8,7 @@ using System;
 public class SpinnerWheel : MonoBehaviour
 {
     [SerializeField]
-    int segments = 37; // Cambiado a 37 para una ruleta estándar europea (0-36)
+    int segments = 37; // Fijo en 37 segmentos para la ruleta estándar europea (0-36)
     [SerializeField]
     float needleThresholdDegrees = 5f;
     [SerializeField]
@@ -62,6 +62,7 @@ public class SpinnerWheel : MonoBehaviour
     {
         Draw();
     }
+
     private SpinnerWheelInputHandler SpinCollider
     {
         get
@@ -73,6 +74,8 @@ public class SpinnerWheel : MonoBehaviour
             return _spinCollider;
         }
     }
+
+    // Calcula el offset para centrar los wedges correctamente
     private float Offset => Mathf.DeltaAngle(0f, 360f / segments) / 2f;
 
     public void Draw()
@@ -80,6 +83,8 @@ public class SpinnerWheel : MonoBehaviour
         wedge.gameObject.SetActive(false);
         wedgeLabel.gameObject.SetActive(false);
         SpinCollider.transform.localEulerAngles = Vector3.zero;
+
+        // Eliminar los anteriores wedges antes de dibujar nuevos
         for (int i = wedge.transform.parent.childCount - 1; i >= 0; i--)
         {
             Transform child = wedge.transform.parent.GetChild(i);
@@ -88,22 +93,29 @@ public class SpinnerWheel : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+
+        // Dibujar los wedges fijos
         for (int i = 0; i < segments; i++)
         {
             float borderAngle = Mathf.Lerp(0f, 180f, border);
             float angle = ((360f / segments) * i) + borderAngle;
-            Color color = (i % 2 == 0 && i != 0) ? Color.red : Color.black; // El 0 se queda negro
+            Color color = (i == 0) ? Color.green : (i % 2 == 0 ? Color.red : Color.black); // Cambiar el 0 a verde
+
             UnityEngine.UI.Image thisWedge = Instantiate(wedge, wedge.transform.parent);
             TextMeshProUGUI thisLabel = Instantiate(wedgeLabel, wedgeLabel.transform.parent);
+
+            // Alineación adecuada de los wedges
             thisLabel.transform.position = wedgeLabel.transform.position;
             thisWedge.transform.localEulerAngles = new Vector3(0, 0, Offset - borderAngle);
             thisWedge.color = color;
-            thisWedge.fillAmount = (1f / segments) - border;
+            thisWedge.fillAmount = (1f / segments) - border;  // Ajuste para que el wedge no se deforme
             thisWedge.transform.localPosition = wedge.transform.localPosition;
             thisWedge.gameObject.SetActive(true);
             thisLabel.SetText(i.ToString());
             thisLabel.transform.SetParent(thisWedge.transform);
             thisLabel.gameObject.SetActive(true);
+
+            // Ajustar la orientación del wedge para que se dibuje correctamente
             thisWedge.transform.localEulerAngles = new Vector3(0, 0, Offset - angle);
         }
     }
@@ -136,6 +148,8 @@ public class SpinnerWheel : MonoBehaviour
         float spinDuration = duration + UnityEngine.Random.Range(posRandom * -1f, posRandom);
         float elapsed = 0f;
         Transform spinner = SpinCollider.transform;
+
+        // Animación de la ruleta
         while (elapsed < spinDuration)
         {
             float currentZ = spinner.localEulerAngles.z;
@@ -145,6 +159,7 @@ public class SpinnerWheel : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
 
+        // Determinar el punto más cercano a la aguja
         Vector3[] positions = new Vector3[segments];
         for (int i = 0; i < segments; i++)
         {
