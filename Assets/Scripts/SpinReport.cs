@@ -13,7 +13,7 @@ public class SpinReport : MonoBehaviour
 
     public void Report(int result)
     {
-        text.SetText($"Result: {result + 1}");
+        text.SetText($"Resultado: {result }");
     }
     public void Clear()
     {
